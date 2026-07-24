@@ -1,0 +1,190 @@
+{
+  "elements": [
+    {
+      "type": "Label",
+      "caption": "BACnet-Quellvariablen der Lüftungsanlage. Das Modul legt keine doppelten Messwerte an."
+    },
+    {
+      "type": "SelectVariable",
+      "name": "OutdoorTemperatureID",
+      "caption": "Außenlufttemperatur"
+    },
+    {
+      "type": "SelectVariable",
+      "name": "SupplyTemperatureID",
+      "caption": "Zulufttemperatur"
+    },
+    {
+      "type": "SelectVariable",
+      "name": "ExtractTemperatureID",
+      "caption": "Ablufttemperatur"
+    },
+    {
+      "type": "SelectVariable",
+      "name": "ExhaustTemperatureID",
+      "caption": "Fortlufttemperatur"
+    },
+    {
+      "type": "SelectVariable",
+      "name": "SupplyFlowID",
+      "caption": "Zuluft-Volumenstrom"
+    },
+    {
+      "type": "SelectVariable",
+      "name": "ExtractFlowID",
+      "caption": "Abluft-Volumenstrom"
+    },
+    {
+      "type": "SelectVariable",
+      "name": "SupplyFlowSetpointID",
+      "caption": "Zuluft-Sollvolumenstrom"
+    },
+    {
+      "type": "SelectVariable",
+      "name": "ExtractFlowSetpointID",
+      "caption": "Abluft-Sollvolumenstrom"
+    },
+    {
+      "type": "SelectVariable",
+      "name": "SupplyFanID",
+      "caption": "Zuluftventilator"
+    },
+    {
+      "type": "SelectVariable",
+      "name": "ExtractFanID",
+      "caption": "Abluftventilator"
+    },
+    {
+      "type": "SelectVariable",
+      "name": "SupplySetpointID",
+      "caption": "Zulufttemperatur-Sollwert"
+    },
+    {
+      "type": "SelectVariable",
+      "name": "ModeID",
+      "caption": "Betriebsart"
+    },
+    {
+      "type": "SelectVariable",
+      "name": "HeatPumpID",
+      "caption": "Wärmepumpe"
+    },
+    {
+      "type": "SelectVariable",
+      "name": "HeatExchangerID",
+      "caption": "Wärmerückgewinnung"
+    },
+    {
+      "type": "SelectVariable",
+      "name": "AlarmID",
+      "caption": "Alarmanzeige"
+    },
+    {
+      "type": "ExpansionPanel",
+      "caption": "Klappen, Filter und optionale Aggregate",
+      "items": [
+        {
+          "type": "SelectVariable",
+          "name": "OutdoorDamperID",
+          "caption": "Außenluftklappe"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "ExhaustDamperID",
+          "caption": "Fortluftklappe"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "OutdoorFilterID",
+          "caption": "Außenluftfilter-Status"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "ExtractFilterID",
+          "caption": "Abluftfilter-Status"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "OutdoorFilterPressureID",
+          "caption": "Außenluftfilter-Differenzdruck"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "ExtractFilterPressureID",
+          "caption": "Abluftfilter-Differenzdruck"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "OutdoorFilterChangeID",
+          "caption": "Außenluftfilter-Wechselwarnung"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "ExtractFilterChangeID",
+          "caption": "Abluftfilter-Wechselwarnung"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "WaterHeaterID",
+          "caption": "Wasserheizung"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "ElectricHeaterID",
+          "caption": "Elektroheizung"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "WaterCoolerID",
+          "caption": "Wasserkühlung"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "DXUnitID",
+          "caption": "DX-Kühlaggregat"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "HumidifierID",
+          "caption": "Befeuchter"
+        },
+        {
+          "type": "SelectVariable",
+          "name": "RecirculationID",
+          "caption": "Umluftklappe"
+        }
+      ]
+    },
+    {
+      "type": "NumberSpinner",
+      "name": "UpdateInterval",
+      "caption": "BACnet-Aktualisierung in Sekunden",
+      "minimum": 15,
+      "maximum": 3600
+    }
+  ],
+  "actions": [
+    {
+      "type": "Button",
+      "caption": "BACnet-Werte jetzt aktualisieren",
+      "onClick": "KVL_UpdateData($id);"
+    }
+  ],
+  "status": [
+    {
+      "code": 102,
+      "icon": "active",
+      "caption": "Aktiv"
+    },
+    {
+      "code": 201,
+      "icon": "error",
+      "caption": "Quellvariablen nicht vollständig konfiguriert"
+    },
+    {
+      "code": 202,
+      "icon": "error",
+      "caption": "BACnet-Daten nicht verfügbar"
+    }
+  ]
+}
