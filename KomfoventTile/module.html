@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+        :root {
+            color-scheme: light dark;
+            --line: color-mix(in srgb, CanvasText 16%, transparent);
+            --panel: color-mix(in srgb, Canvas 91%, transparent);
+            --outside: #43a9df;
+            --supply: #26c1b2;
+            --extract: #f2a93b;
+            --exhaust: #db6b68;
+            --ok: #27b47e;
+            --danger: #e35262;
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+        }
+        * { box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; color: CanvasText; }
+        body { padding: 8px; }
+        .card {
+            position: relative; height: 100%; min-height: 226px; padding: 9px 11px 10px;
+            border: 1px solid var(--line); border-radius: 16px; overflow: hidden;
+            background:
+                radial-gradient(circle at 52% 50%, color-mix(in srgb, var(--supply) 8%, transparent), transparent 35%),
+                var(--panel);
+        }
+        .title-space { height: 28px; min-height: 28px; }
+        .mode-control { position: absolute; z-index: 20; top: 20px; left: 58%; transform: translateX(-50%); pointer-events: auto; }
+        .mode-select {
+            max-width: 116px; height: 25px; padding: 2px 24px 2px 9px;
+            border: 1px solid color-mix(in srgb, var(--supply) 42%, var(--line));
+            border-radius: 8px; outline: none; color: CanvasText;
+            background: color-mix(in srgb, Canvas 88%, var(--supply) 12%);
+            font: 750 .61rem/1 Inter, system-ui, sans-serif; cursor: pointer;
+        }
+        .mode-select:focus { border-color: var(--supply); box-shadow: 0 0 0 2px color-mix(in srgb, var(--supply) 20%, transparent); }
+        .mode-select:disabled { cursor: wait; opacity: .58; }
+        .diagram { position: relative; height: calc(100% - 30px); min-height: 160px; }
+        svg { width: 100%; height: 100%; overflow: visible; }
+        .duct { fill: none; stroke-width: 16; stroke-linecap: round; opacity: .18; }
+        .air { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 4 9; animation: flow 1.15s linear infinite; }
+        .direction { fill: currentColor; opacity: .9; filter: drop-shadow(0 0 3px color-mix(in srgb, currentColor 45%, transparent)); }
+        .component-shell { fill: color-mix(in srgb, Canvas 88%, transparent); stroke: currentColor; stroke-width: 1.3; }
+        .damper-blade { stroke: currentColor; stroke-width: 3; stroke-linecap: round; transform-box: fill-box; transform-origin: center; transition: transform .55s ease; }
+        .filter-fold { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; }
+        .filter.warning { color: var(--danger) !important; }
+        .filter.warning .component-shell { fill: color-mix(in srgb, Canvas 80%, var(--danger) 20%); }
+        .component-value { font-size: 6.5px; font-weight: 800; fill: currentColor; opacity: .72; }
+        .inactive .air { animation-play-state: paused; opacity: .28; }
+        @keyframes flow { to { stroke-dashoffset: -26; } }
+        .fan-ring { fill: color-mix(in srgb, Canvas 85%, transparent); stroke: currentColor; stroke-width: 1.5; }
+        .fan { transform-box: fill-box; transform-origin: center; animation: spin 1.65s linear infinite; }
+        .fan.reverse-spin { animation-direction: reverse; }
+        .inactive .fan { animation-play-state: paused; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .wheel { transform-box: fill-box; transform-origin: center; animation: spin 7s linear infinite; }
+        .inactive .wheel { animation-play-state: paused; }
+        .value { font-size: 13px; font-weight: 850; fill: currentColor; }
+        .label { font-size: 7.5px; font-weight: 800; letter-spacing: .1em; fill: currentColor; opacity: .54; }
+        .sub { font-size: 7.5px; font-weight: 650; fill: currentColor; opacity: .7; }
+        .center-label { font-size: 7px; font-weight: 800; fill: currentColor; opacity: .62; letter-spacing: .08em; }
+        .footer { position: absolute; left: 10px; right: 10px; bottom: 7px; display: flex; justify-content: center; gap: 14px; font-size: .64rem; font-weight: 650; opacity: .76; }
+        .footer b { color: CanvasText; font-size: .72rem; opacity: 1; }
+        .footer b.active { color: var(--ok); }
+        .devices { position: absolute; left: 50%; bottom: 28px; z-index: 2; display: flex; transform: translateX(-50%); gap: 4px; }
+        .device { padding: 3px 5px; border: 1px solid var(--line); border-radius: 6px; background: color-mix(in srgb, Canvas 88%, transparent); font-size: .45rem; font-weight: 800; white-space: nowrap; }
+        .device.heat { color: var(--exhaust); }
+        .device.cool { color: var(--outside); }
+        .device.humidity { color: var(--supply); }
+        .card.alarm { border-color: color-mix(in srgb, var(--danger) 72%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 24%, transparent); }
+        .alarm .mode-select { border-color: var(--danger); }
+        @keyframes pulse { 50% { opacity: .35; } }
+        .offline { position: absolute; inset: 38px 9px 9px; z-index: 5; display: grid; place-items: center; padding: 16px; border-radius: 12px; text-align: center; font-size: .68rem; font-weight: 700; color: var(--danger); background: color-mix(in srgb, Canvas 92%, var(--danger) 8%); backdrop-filter: blur(5px); }
+        [hidden] { display: none !important; }
+        @media (max-height: 270px) {
+            .title-space { height: 24px; min-height: 24px; }
+            .diagram { height: calc(100% - 26px); }
+        }
+    </style>
+</head>
+<body>
+<section class="card" id="card">
+    <div class="mode-control">
+        <select class="mode-select" id="modeSelect" aria-label="Betriebsart wählen" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+            <option value="0">Aus / Standby</option>
+            <option value="1">Comfort 1</option>
+            <option value="2">Comfort 2</option>
+            <option value="3">Economy 1</option>
+            <option value="4">Economy 2</option>
+            <option value="5">Special</option>
+        </select>
+    </div>
+    <div class="title-space" aria-hidden="true"></div>
+    <div class="diagram" id="diagram">
+        <svg viewBox="0 0 400 205" role="img" aria-label="Luftstromschema der Lüftungsanlage">
+            <defs>
+                <linearGradient id="hx" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#f2a93b"/>
+                    <stop offset=".48" stop-color="#db6b68"/>
+                    <stop offset=".52" stop-color="#43a9df"/>
+                    <stop offset="1" stop-color="#26c1b2"/>
+                </linearGradient>
+            </defs>
+
+            <path class="duct" stroke="var(--extract)" d="M370 60H238"/>
+            <path class="duct" stroke="var(--exhaust)" d="M162 60H30"/>
+            <path class="duct" stroke="var(--outside)" d="M30 146H162"/>
+            <path class="duct" stroke="var(--supply)" d="M238 146H370"/>
+            <path class="air" stroke="var(--extract)" d="M370 60H238"/>
+            <path class="air" stroke="var(--exhaust)" d="M162 60H30"/>
+            <path class="air" stroke="var(--outside)" d="M30 146H162"/>
+            <path class="air" stroke="var(--supply)" d="M238 146H370"/>
+            <path class="direction" style="color:var(--extract)" d="M318 54l-10 6 10 6z"/>
+            <path class="direction" style="color:var(--exhaust)" d="M78 54l-10 6 10 6z"/>
+            <path class="direction" style="color:var(--outside)" d="M82 140l10 6-10 6z"/>
+            <path class="direction" style="color:var(--supply)" d="M322 140l10 6-10 6z"/>
+
+            <g style="color:var(--exhaust)" transform="translate(48 60)">
+                <rect class="component-shell" x="-10" y="-12" width="20" height="24" rx="4"/>
+                <line class="damper-blade" id="exhaustDamperBlade" x1="0" y1="-8" x2="0" y2="8"/>
+                <text class="component-value" id="exhaustDamperValue" x="0" y="22" text-anchor="middle">–</text>
+                <title>Fortluftklappe</title>
+            </g>
+            <g class="filter" id="extractFilterIcon" style="color:var(--extract)" transform="translate(326 60)">
+                <rect class="component-shell" x="-11" y="-12" width="22" height="24" rx="4"/>
+                <path class="filter-fold" d="M-7-7l5 5-5 5 5 5M1-7l5 5-5 5 5 5"/>
+                <text class="component-value" id="extractFilterValue" x="0" y="22" text-anchor="middle">–</text>
+                <title>Abluftfilter</title>
+            </g>
+            <g style="color:var(--outside)" transform="translate(48 146)">
+                <rect class="component-shell" x="-10" y="-12" width="20" height="24" rx="4"/>
+                <line class="damper-blade" id="outdoorDamperBlade" x1="0" y1="-8" x2="0" y2="8"/>
+                <text class="component-value" id="outdoorDamperValue" x="0" y="22" text-anchor="middle">–</text>
+                <title>Außenluftklappe</title>
+            </g>
+            <g class="filter" id="outdoorFilterIcon" style="color:var(--outside)" transform="translate(126 146)">
+                <rect class="component-shell" x="-11" y="-12" width="22" height="24" rx="4"/>
+                <path class="filter-fold" d="M-7-7l5 5-5 5 5 5M1-7l5 5-5 5 5 5"/>
+                <text class="component-value" id="outdoorFilterValue" x="0" y="22" text-anchor="middle">–</text>
+                <title>Außenluftfilter</title>
+            </g>
+
+            <g transform="translate(200 103)">
+                <rect x="-38" y="-65" width="76" height="130" rx="17" fill="color-mix(in srgb, Canvas 92%, transparent)" stroke="currentColor" stroke-opacity=".18"/>
+                <circle class="wheel" cx="0" cy="0" r="27" fill="none" stroke="url(#hx)" stroke-width="9" stroke-dasharray="11 5"/>
+                <circle cx="0" cy="0" r="12" fill="color-mix(in srgb, Canvas 88%, transparent)" stroke="currentColor" stroke-opacity=".18"/>
+                <path d="M-7-6L7 6M7-6L-7 6" stroke="currentColor" stroke-opacity=".55" stroke-width="2"/>
+                <text class="center-label" x="0" y="48" text-anchor="middle">WRG</text>
+                <text class="sub" id="hxValue" x="0" y="59" text-anchor="middle">–</text>
+            </g>
+
+            <g style="color:var(--exhaust)" transform="translate(118 60)">
+                <circle class="fan-ring" r="17"/>
+                <g class="fan reverse-spin">
+                    <path d="M0-3C-2-16 10-14 9-7C8-2 4 1 0 3M3 0C16-2 14 10 7 9C2 8-1 4-3 0M0 3C2 16-10 14-9 7C-8 2-4-1 0-3M-3 0C-16 2-14-10-7-9C-2-8 1-4 3 0" fill="currentColor"/>
+                </g>
+                <circle r="3" fill="color-mix(in srgb, Canvas 85%, currentColor 15%)"/>
+            </g>
+            <g style="color:var(--supply)" transform="translate(282 146)">
+                <circle class="fan-ring" r="17"/>
+                <g class="fan">
+                    <path d="M0-3C-2-16 10-14 9-7C8-2 4 1 0 3M3 0C16-2 14 10 7 9C2 8-1 4-3 0M0 3C2 16-10 14-9 7C-8 2-4-1 0-3M-3 0C-16 2-14-10-7-9C-2-8 1-4 3 0" fill="currentColor"/>
+                </g>
+                <circle r="3" fill="color-mix(in srgb, Canvas 85%, currentColor 15%)"/>
+            </g>
+
+            <g transform="translate(366 7)" text-anchor="end">
+                <text class="label" x="0" y="0">ABLUFT</text>
+                <text class="value" id="extractTemp" x="0" y="17">–</text>
+                <text class="sub" id="extractFlow" x="0" y="30">–</text>
+            </g>
+            <g transform="translate(34 7)">
+                <text class="label" x="0" y="0">FORTLUFT</text>
+                <text class="value" id="exhaustTemp" x="0" y="17">–</text>
+                <text class="sub" id="extractFan" x="0" y="30">–</text>
+            </g>
+            <g transform="translate(34 174)">
+                <text class="label" x="0" y="0">AUSSENLUFT</text>
+                <text class="value" id="outdoorTemp" x="0" y="17">–</text>
+            </g>
+            <g transform="translate(366 174)" text-anchor="end">
+                <text class="label" x="0" y="0">ZULUFT</text>
+                <text class="value" id="supplyTemp" x="0" y="17">–</text>
+                <text class="sub" id="supplyFlow" x="0" y="30">–</text>
+            </g>
+        </svg>
+    </div>
+    <div class="footer">
+        <span>Solltemperatur <b id="setpoint">–</b></span>
+        <span>Zuluftventilator <b id="supplyFanFooter">–</b></span>
+        <span>Wärmepumpe <b id="heatPumpStatus">–</b></span>
+    </div>
+    <div class="devices" id="devices">
+        <span class="device heat" id="waterHeater" hidden>HEIZREGISTER</span>
+        <span class="device heat" id="electricHeater" hidden>E-HEIZUNG</span>
+        <span class="device cool" id="waterCooler" hidden>KÜHLUNG</span>
+        <span class="device cool" id="dxUnit" hidden>DX-KÜHLUNG</span>
+        <span class="device humidity" id="humidifier" hidden>BEFEUCHTER</span>
+        <span class="device" id="recirculation" hidden>UMLUFT</span>
+    </div>
+    <div class="offline" id="offline" hidden>Daten der Lüftungsanlage nicht verfügbar</div>
+</section>
+<script>
+    const $ = id => document.getElementById(id);
+    const number = (value, digits = 1) => Number.isFinite(Number(value))
+        ? Number(value).toLocaleString('de-DE', {minimumFractionDigits: digits, maximumFractionDigits: digits})
+        : '–';
+    const temp = value => `${number(value)} °C`;
+    const flow = (actual, target) => `${number(actual, 0)} m³/h${Number(target) > 0 ? ` · Soll ${number(target, 0)}` : ''}`;
+    const percent = value => `${number(value, 0)} %`;
+    function render(s) {
+        const running = Number(s.mode) > 0;
+        $('diagram').classList.toggle('inactive', !running);
+        $('card').classList.toggle('alarm', Number(s.alarm) !== 0);
+        $('modeSelect').value = String(Number(s.mode));
+        $('modeSelect').disabled = false;
+        $('outdoorTemp').textContent = temp(s.outdoor);
+        $('supplyTemp').textContent = temp(s.supply);
+        $('extractTemp').textContent = temp(s.extract);
+        $('exhaustTemp').textContent = temp(s.exhaust);
+        $('supplyFlow').textContent = flow(s.supplyFlow, s.supplyFlowSetpoint);
+        $('extractFlow').textContent = flow(s.extractFlow, s.extractFlowSetpoint);
+        $('extractFan').textContent = `Ventilator ${percent(s.extractFan)}`;
+        $('supplyFanFooter').textContent = percent(s.supplyFan);
+        $('setpoint').textContent = temp(s.supplySetpoint);
+        const heatPumpActive = Math.abs(Number(s.heatPump)) > .05;
+        $('heatPumpStatus').textContent = heatPumpActive ? `AKTIV ${percent(Math.abs(Number(s.heatPump)))}` : 'AUS';
+        $('heatPumpStatus').classList.toggle('active', heatPumpActive);
+        const hx = Math.abs(Number(s.heatExchanger));
+        $('hxValue').textContent = hx > 0 && hx <= 100 ? percent(hx) : (running ? 'aktiv' : 'aus');
+        const outdoorDamper = Math.max(0, Math.min(100, Number(s.outdoorDamper) || 0));
+        const exhaustDamper = Math.max(0, Math.min(100, Number(s.exhaustDamper) || 0));
+        $('outdoorDamperBlade').style.transform = `rotate(${outdoorDamper * .9}deg)`;
+        $('exhaustDamperBlade').style.transform = `rotate(${exhaustDamper * .9}deg)`;
+        $('outdoorDamperValue').textContent = percent(outdoorDamper);
+        $('exhaustDamperValue').textContent = percent(exhaustDamper);
+        const outdoorFilterWarning = !!s.outdoorFilter || !!s.outdoorFilterChange;
+        const extractFilterWarning = !!s.extractFilter || !!s.extractFilterChange;
+        $('outdoorFilterIcon').classList.toggle('warning', outdoorFilterWarning);
+        $('extractFilterIcon').classList.toggle('warning', extractFilterWarning);
+        $('outdoorFilterValue').textContent = outdoorFilterWarning ? 'WECHSEL' : `${number(s.outdoorFilterPressure, 0)} Pa`;
+        $('extractFilterValue').textContent = extractFilterWarning ? 'WECHSEL' : `${number(s.extractFilterPressure, 0)} Pa`;
+        const devices = [
+            ['waterHeater', s.waterHeater], ['electricHeater', s.electricHeater],
+            ['waterCooler', s.waterCooler], ['dxUnit', s.dxUnit],
+            ['humidifier', s.humidifier], ['recirculation', s.recirculation]
+        ];
+        devices.forEach(([id, value]) => {
+            const active = Math.abs(Number(value)) > .05;
+            $(id).hidden = !active;
+            if (active) $(id).textContent = `${$(id).textContent.split(' ')[0]} ${percent(Math.abs(Number(value)))}`;
+        });
+        $('offline').hidden = !!s.valid;
+        $('offline').textContent = s.error || 'Daten der Lüftungsanlage nicht verfügbar';
+    }
+    $('modeSelect').addEventListener('change', event => {
+        const mode = Number(event.target.value);
+        if (!Number.isInteger(mode) || mode < 0 || mode > 5) return;
+        event.target.disabled = true;
+        requestAction('SetMode', mode);
+    });
+    function handleMessage(data) { render(typeof data === 'string' ? JSON.parse(data) : data); }
+    render(__INITIAL_STATE__);
+</script>
+</body>
+</html>
