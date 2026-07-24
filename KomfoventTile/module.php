@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-class KomfoventLüftungskachel extends IPSModule
+class KomfoventLueftungskachel extends IPSModule
 {
     private const SOURCES = [
         'OutdoorTemperatureID', 'SupplyTemperatureID', 'ExtractTemperatureID', 'ExhaustTemperatureID',
