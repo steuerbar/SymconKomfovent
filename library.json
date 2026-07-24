@@ -1,0 +1,12 @@
+{
+  "id": "{BE943F5E-6C23-470F-8FCA-BC89F1D75EA0}",
+  "author": "steuerbar",
+  "name": "Komfovent Lüftung",
+  "url": "https://github.com/steuerbar/SymconKomfovent",
+  "compatibility": {
+    "version": "7.1"
+  },
+  "version": "1.9",
+  "build": 10,
+  "date": 1784851200
+}
